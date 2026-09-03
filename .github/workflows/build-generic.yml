@@ -2,13 +2,7 @@ name: Build RenoDX Generic
 
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths-ignore:
-      - "**/*.md"
-      - "docs/**"
-      - ".github/workflows/**"
-
+  
 jobs:
   build:
     runs-on: windows-latest
