@@ -42,14 +42,8 @@ jobs:
       - name: Configure CMake (x64)
         run: cmake --preset clang-x64 -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
 
-      - name: List available Ninja targets (debug)
-        shell: pwsh
-        run: |
-          cd build
-          C:\ProgramData\chocolatey\bin\ninja.exe -f build-Release.ninja -t targets | Select-String -Pattern "generic" -CaseSensitive:$false
-
       - name: Build (x64) - generic only
-        run: cmake --build --preset clang-x64-release --target generic --verbose
+        run: cmake --build --preset clang-x64-release --target renodx-generic.addon64 --verbose
 
       - name: Show sccache stats
         if: always()
@@ -59,9 +53,9 @@ jobs:
         id: locate
         shell: pwsh
         run: |
-          $file = Get-ChildItem -Path . -Recurse -Filter "*generic*.addon64" -ErrorAction SilentlyContinue | Select-Object -First 1
+          $file = Get-ChildItem -Path . -Recurse -Filter "renodx-generic.addon64" -ErrorAction SilentlyContinue | Select-Object -First 1
           if ($null -eq $file) {
-            Write-Error "Aucun .addon64 contenant 'generic' trouve"
+            Write-Error "renodx-generic.addon64 introuvable"
             exit 1
           }
           Write-Host "Trouve : $($file.FullName)"
