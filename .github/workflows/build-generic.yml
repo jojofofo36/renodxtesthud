@@ -29,17 +29,8 @@ jobs:
           arch: amd64
       - name: Configure CMake (x64)
         run: cmake --preset clang-x64 -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
-      - name: Query target dependencies (debug)
-        shell: pwsh
-        working-directory: build
-        run: |
-          Write-Host "=== Dependances de renodx-generic.addon64 ==="
-          ninja -t query renodx-generic.addon64
-
-          Write-Host "`n=== Targets contenant shader/draw/common/codegen/generic ==="
-          ninja -t targets | Select-String -Pattern 'shader|draw|common|codegen|generic'
-      - name: Build (x64) - generic only
-        run: cmake --build --preset clang-x64-release --target renodx-generic.addon64 --verbose
+      - name: Build (x64)
+        run: cmake --build --preset clang-x64-release --verbose
       - name: Show sccache stats
         if: always()
         run: sccache --show-stats
