@@ -36,24 +36,24 @@ jobs:
             /D __SHADER_TARGET_MAJOR=5 `
             /D __SHADER_TARGET_MINOR=0 `
             /DNDEBUG /Gec /nologo `
-            /P ".\preprocessed_generic_swapchain.i"
+            /P ".\preprocessed_generic_swapchain.i" 2>&1
           Write-Host "=== Nombre de lignes (generic) ==="
-          (Get-Content ".\preprocessed_generic_swapchain.i").Count
+          if (Test-Path ".\preprocessed_generic_swapchain.i") { (Get-Content ".\preprocessed_generic_swapchain.i").Count }
           Write-Host "=== 'namespace draw' present dans generic ? ==="
-          Select-String -Path ".\preprocessed_generic_swapchain.i" -Pattern "namespace draw"
-      - name: Debug preprocess haste swapchain shader (control test)
+          if (Test-Path ".\preprocessed_generic_swapchain.i") { Select-String -Path ".\preprocessed_generic_swapchain.i" -Pattern "namespace draw" }
+      - name: Debug preprocess haste swapchain shader (control test, ps_4_0)
         shell: pwsh
         run: |
           & ".\bin\fxc.exe" `
-            ".\src\games\haste\swap_chain_proxy_pixel_shader.ps_5_x.hlsl" `
-            /D __SHADER_TARGET_MAJOR=5 `
+            ".\src\games\haste\swap_chain_proxy_pixel_shader.ps_4_0.hlsl" `
+            /D __SHADER_TARGET_MAJOR=4 `
             /D __SHADER_TARGET_MINOR=0 `
             /DNDEBUG /Gec /nologo `
-            /P ".\preprocessed_haste_swapchain.i"
+            /P ".\preprocessed_haste_swapchain.i" 2>&1
           Write-Host "=== Nombre de lignes (haste) ==="
-          (Get-Content ".\preprocessed_haste_swapchain.i").Count
+          if (Test-Path ".\preprocessed_haste_swapchain.i") { (Get-Content ".\preprocessed_haste_swapchain.i").Count }
           Write-Host "=== 'namespace draw' present dans haste ? ==="
-          Select-String -Path ".\preprocessed_haste_swapchain.i" -Pattern "namespace draw"
+          if (Test-Path ".\preprocessed_haste_swapchain.i") { Select-String -Path ".\preprocessed_haste_swapchain.i" -Pattern "namespace draw" }
       - name: Upload preprocessed files
         if: always()
         uses: actions/upload-artifact@v4
