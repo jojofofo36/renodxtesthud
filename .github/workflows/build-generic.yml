@@ -1,7 +1,6 @@
 name: Build RenoDX Generic
 on:
   workflow_dispatch:
-
 jobs:
   build:
     runs-on: windows-latest
@@ -29,6 +28,12 @@ jobs:
           arch: amd64
       - name: Configure CMake (x64)
         run: cmake --preset clang-x64 -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
+      - name: Show exact fxc command (untruncated)
+        shell: pwsh
+        working-directory: build
+        run: |
+          ninja -t commands generic.include/embed/swap_chain_proxy_pixel_shader_dx11.cso | Out-File -FilePath full_command.txt -Encoding utf8
+          Get-Content full_command.txt
       - name: Debug preprocess generic swapchain shader
         shell: pwsh
         run: |
