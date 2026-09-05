@@ -1,6 +1,7 @@
 name: Build RenoDX Generic
 on:
   workflow_dispatch:
+
 jobs:
   build:
     runs-on: windows-latest
@@ -28,41 +29,25 @@ jobs:
           arch: amd64
       - name: Configure CMake (x64)
         run: cmake --preset clang-x64 -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
-      - name: Debug preprocess generic swapchain shader
-        shell: pwsh
-        run: |
-          & ".\bin\fxc.exe" `
-            ".\src\games\generic\swap_chain_proxy_pixel_shader.ps_5_x.hlsl" `
-            /D __SHADER_TARGET_MAJOR=5 `
-            /D __SHADER_TARGET_MINOR=0 `
-            /DNDEBUG /Gec /nologo `
-            /P ".\preprocessed_generic_swapchain.i" 2>&1
-          Write-Host "=== Nombre de lignes (generic) ==="
-          if (Test-Path ".\preprocessed_generic_swapchain.i") { (Get-Content ".\preprocessed_generic_swapchain.i").Count }
-      - name: Dump full preprocessed generic file
-        shell: pwsh
-        run: |
-          Write-Host "=== Contenu complet (70 lignes attendues) ==="
-          Get-Content ".\preprocessed_generic_swapchain.i" | ForEach-Object { $i=0 } { $i++; "$i`: $_" }
-      - name: Debug preprocess haste swapchain shader (control test, ps_4_0)
-        shell: pwsh
-        run: |
-          & ".\bin\fxc.exe" `
-            ".\src\games\haste\swap_chain_proxy_pixel_shader.ps_4_0.hlsl" `
-            /D __SHADER_TARGET_MAJOR=4 `
-            /D __SHADER_TARGET_MINOR=0 `
-            /DNDEBUG /Gec /nologo `
-            /P ".\preprocessed_haste_swapchain.i" 2>&1
-          Write-Host "=== Nombre de lignes (haste) ==="
-          if (Test-Path ".\preprocessed_haste_swapchain.i") { (Get-Content ".\preprocessed_haste_swapchain.i").Count }
-          Write-Host "=== 'namespace draw' present dans haste ? ==="
-          if (Test-Path ".\preprocessed_haste_swapchain.i") { Select-String -Path ".\preprocessed_haste_swapchain.i" -Pattern "namespace draw" }
-      - name: Upload preprocessed files
+      - name: Build (x64) - generic only
+        run: cmake --build --preset clang-x64-release --target renodx-generic.addon64 --verbose
+      - name: Show sccache stats
         if: always()
+        run: sccache --show-stats
+      - name: Locate compiled addon
+        id: locate
+        shell: pwsh
+        run: |
+          $file = Get-ChildItem -Path . -Recurse -Filter "renodx-generic.addon64" -ErrorAction SilentlyContinue | Select-Object -First 1
+          if ($null -eq $file) {
+            Write-Error "renodx-generic.addon64 introuvable"
+            exit 1
+          }
+          Write-Host "Trouve : $($file.FullName)"
+          echo "addon_path=$($file.FullName)" >> $env:GITHUB_OUTPUT
+      - name: Upload addon artifact
         uses: actions/upload-artifact@v4
         with:
-          name: preprocessed-debug
-          path: |
-            preprocessed_generic_swapchain.i
-            preprocessed_haste_swapchain.i
-          if-no-files-found: warn
+          name: renodx-generic-x64
+          path: ${{ steps.locate.outputs.addon_path }}
+          if-no-files-found: error
