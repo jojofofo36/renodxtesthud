@@ -39,8 +39,11 @@ jobs:
             /P ".\preprocessed_generic_swapchain.i" 2>&1
           Write-Host "=== Nombre de lignes (generic) ==="
           if (Test-Path ".\preprocessed_generic_swapchain.i") { (Get-Content ".\preprocessed_generic_swapchain.i").Count }
-          Write-Host "=== 'namespace draw' present dans generic ? ==="
-          if (Test-Path ".\preprocessed_generic_swapchain.i") { Select-String -Path ".\preprocessed_generic_swapchain.i" -Pattern "namespace draw" }
+      - name: Dump full preprocessed generic file
+        shell: pwsh
+        run: |
+          Write-Host "=== Contenu complet (70 lignes attendues) ==="
+          Get-Content ".\preprocessed_generic_swapchain.i" | ForEach-Object { $i=0 } { $i++; "$i`: $_" }
       - name: Debug preprocess haste swapchain shader (control test, ps_4_0)
         shell: pwsh
         run: |
