@@ -34,7 +34,6 @@ jobs:
         run: |
           & ".\bin\fxc.exe" `
             ".\src\games\generic\swap_chain_proxy_pixel_shader.ps_5_x.hlsl" `
-            -T ps_5_0 `
             /D __SHADER_TARGET_MAJOR=5 `
             /D __SHADER_TARGET_MINOR=0 `
             /DNDEBUG /Gec /nologo `
