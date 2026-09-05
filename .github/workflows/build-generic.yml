@@ -28,12 +28,6 @@ jobs:
           arch: amd64
       - name: Configure CMake (x64)
         run: cmake --preset clang-x64 -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
-      - name: Show exact fxc command (untruncated)
-        shell: pwsh
-        working-directory: build
-        run: |
-          ninja -t commands generic.include/embed/swap_chain_proxy_pixel_shader_dx11.cso | Out-File -FilePath full_command.txt -Encoding utf8
-          Get-Content full_command.txt
       - name: Debug preprocess generic swapchain shader
         shell: pwsh
         run: |
@@ -43,34 +37,29 @@ jobs:
             /D __SHADER_TARGET_MINOR=0 `
             /DNDEBUG /Gec /nologo `
             /P ".\preprocessed_generic_swapchain.i"
-          Write-Host "=== Recherche de SwapChainPass dans le preprocess ==="
-          Select-String -Path ".\preprocessed_generic_swapchain.i" -Pattern "SwapChainPass" -Context 3,3
-      - name: Upload preprocessed file
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: preprocessed-generic-swapchain
-          path: preprocessed_generic_swapchain.i
-          if-no-files-found: warn
-      - name: Build (x64) - generic only
-        run: cmake --build --preset clang-x64-release --target renodx-generic.addon64 --verbose
-      - name: Show sccache stats
-        if: always()
-        run: sccache --show-stats
-      - name: Locate compiled addon
-        id: locate
+          Write-Host "=== Nombre de lignes (generic) ==="
+          (Get-Content ".\preprocessed_generic_swapchain.i").Count
+          Write-Host "=== 'namespace draw' present dans generic ? ==="
+          Select-String -Path ".\preprocessed_generic_swapchain.i" -Pattern "namespace draw"
+      - name: Debug preprocess haste swapchain shader (control test)
         shell: pwsh
         run: |
-          $file = Get-ChildItem -Path . -Recurse -Filter "renodx-generic.addon64" -ErrorAction SilentlyContinue | Select-Object -First 1
-          if ($null -eq $file) {
-            Write-Error "renodx-generic.addon64 introuvable"
-            exit 1
-          }
-          Write-Host "Trouve : $($file.FullName)"
-          echo "addon_path=$($file.FullName)" >> $env:GITHUB_OUTPUT
-      - name: Upload addon artifact
+          & ".\bin\fxc.exe" `
+            ".\src\games\haste\swap_chain_proxy_pixel_shader.ps_5_x.hlsl" `
+            /D __SHADER_TARGET_MAJOR=5 `
+            /D __SHADER_TARGET_MINOR=0 `
+            /DNDEBUG /Gec /nologo `
+            /P ".\preprocessed_haste_swapchain.i"
+          Write-Host "=== Nombre de lignes (haste) ==="
+          (Get-Content ".\preprocessed_haste_swapchain.i").Count
+          Write-Host "=== 'namespace draw' present dans haste ? ==="
+          Select-String -Path ".\preprocessed_haste_swapchain.i" -Pattern "namespace draw"
+      - name: Upload preprocessed files
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: renodx-generic-x64
-          path: ${{ steps.locate.outputs.addon_path }}
-          if-no-files-found: error
+          name: preprocessed-debug
+          path: |
+            preprocessed_generic_swapchain.i
+            preprocessed_haste_swapchain.i
+          if-no-files-found: warn
