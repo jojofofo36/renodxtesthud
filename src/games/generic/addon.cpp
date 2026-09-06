@@ -46,7 +46,7 @@ bool initialized = false;
 
 }  // namespace
 
-extern "C" __declspec(dllexport) constexpr const char* NAME = "RenoDX";
+extern "C" __declspec(dllexport) constexpr const char* NAME = "HUD";
 extern "C" __declspec(dllexport) constexpr const char* DESCRIPTION = "RenoDX (Generic - HUD Opacity)";
 
 BOOL APIENTRY DllMain(HMODULE h_module, DWORD fdw_reason, LPVOID lpv_reserved) {
