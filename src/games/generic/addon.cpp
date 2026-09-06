@@ -23,6 +23,7 @@ renodx::mods::shader::CustomShaders custom_shaders = {
     CustomShaderEntry(0x0CD6915A),  // hud - bar/dissolve
     CustomShaderEntry(0x0FD65E23),  // hud - TODO: remplacer par le hash reel
     CustomShaderEntry(0x710D02E7),  // hud - TODO: remplacer par le hash reel
+    CustomShaderEntry(0xB63287AE),  // hud - TODO: remplacer par le hash reel
 };
 
 ShaderInjectData shader_injection;
